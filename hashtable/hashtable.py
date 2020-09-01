@@ -86,6 +86,21 @@ class LinkedList:
             # Overwrite old value
             this_node.value = node.value
 
+    def return_list(self):
+        if self.head == None:
+            return None
+        else:
+            this_list = []
+            cur = self.head
+            while cur != None:
+                this_list.append(cur)
+                next_node = cur.next
+                cur = next_node
+            for i in this_list:
+                print(i.key, i.value)
+            return this_list
+
+
 
 
 class HashTable:
@@ -99,6 +114,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.table = [None] * capacity
+        self.load = 0
 
 
     def get_num_slots(self):
@@ -122,6 +138,9 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        load_factor = self.load / self.capacity
+        return load_factor
+
 
 
 
@@ -172,8 +191,12 @@ class HashTable:
         if self.table[index] == None:
             self.table[index] = LinkedList()
             self.table[index].insert_at_head(new_node)
+            self.load += 1
+            if self.get_load_factor() > .7:
+                self.resize(self.capacity * 2)
         else:
             self.table[index].insert_or_overwrite_value(new_node)
+        
 
          
 
@@ -193,6 +216,7 @@ class HashTable:
             print("Nothing here")
         else:
             self.table[index].delete(key)
+            self.load -= 1
 
     def get(self, key):
         """
@@ -220,6 +244,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        new_table = HashTable(new_capacity)
+        
+        for i in self.table:
+            if i != None:
+                this_list = i.return_list()
+                if len(this_list) > 0:
+                    for e in this_list:
+                        new_table.put(e.key, e.value)
+        self.table = new_table
 
 
 
