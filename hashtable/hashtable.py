@@ -96,8 +96,6 @@ class LinkedList:
                 this_list.append(cur)
                 next_node = cur.next
                 cur = next_node
-            for i in this_list:
-                print(i.key, i.value)
             return this_list
 
 
@@ -188,12 +186,13 @@ class HashTable:
         # Your code here
         new_node = HashTableEntry(key, value)
         index = self.hash_index(key)
-        if self.table[index] == None:
+        if self.table[index] == None :
             self.table[index] = LinkedList()
             self.table[index].insert_at_head(new_node)
             self.load += 1
             if self.get_load_factor() > .7:
-                self.resize(self.capacity * 2)
+                new_cap1 = self.capacity * 2
+                self.resize(new_cap1)
         else:
             self.table[index].insert_or_overwrite_value(new_node)
         
@@ -244,15 +243,16 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        new_table = HashTable(new_capacity)
+        old_table = self.table
+        self.capacity = new_capacity
+        self.load = 0
+        self.table = [None] * new_capacity 
         
-        for i in self.table:
+        for i in old_table:
             if i != None:
                 this_list = i.return_list()
-                if len(this_list) > 0:
-                    for e in this_list:
-                        new_table.put(e.key, e.value)
-        self.table = new_table
+                for e in this_list:
+                    self.put(e.key, e.value)
 
 
 
