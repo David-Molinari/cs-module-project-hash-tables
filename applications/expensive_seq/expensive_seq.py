@@ -1,9 +1,8 @@
 # Your code here
-
+table = {}
 
 def expensive_seq(x, y, z):
     # Your code here
-
 
 
 if __name__ == "__main__":
