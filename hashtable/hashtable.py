@@ -7,9 +7,98 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    
+
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
+
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+#     def __str__(self):
+#         """Print entire linked list."""
+# ​
+#         if self.head is None:
+#             return "[Empty List]"
+# ​
+#         cur = self.head
+#         s = ""
+# ​
+#         while cur != None:
+#             s += f'({cur.value})'
+# ​
+#             if cur.next is not None:
+#                 s += '-->'
+# ​
+#             cur = cur.next
+# ​
+#         return s
+
+    def find(self, key):
+        cur = self.head
+
+        while cur is not None:
+            if cur.key == key:
+                return cur
+
+            cur = cur.next
+
+        return None
+
+    def delete(self, key):
+        cur = self.head
+
+        # Special case of deleting head
+
+        if cur.key == key:
+            self.head = cur.next
+            return cur
+
+        # General case of deleting internal node
+
+        prev = cur
+        cur = cur.next
+
+        while cur is not None:
+            if cur.key == key:  # Found it!
+                prev.next = cur.next   # Cut it out
+                return cur  # Return deleted node
+            else:
+                prev = cur
+                cur = cur.next
+
+        return None  # If we got here, nothing found
+
+    def insert_at_head(self, node):
+            node.next = self.head
+            self.head = node
+
+    def insert_or_overwrite_value(self, node):
+        this_node = self.find(node.key)
+
+        if this_node is None:
+            # Make a new node
+            self.insert_at_head(node)
+
+        else:
+            # Overwrite old value
+            this_node.value = node.value
+
+    def return_list(self):
+        if self.head == None:
+            return None
+        else:
+            this_list = []
+            cur = self.head
+            while cur != None:
+                this_list.append(cur)
+                next_node = cur.next
+                cur = next_node
+            return this_list
+
+
 
 
 class HashTable:
@@ -21,7 +110,9 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        # Your code here
+        self.capacity = capacity
+        self.table = [None] * capacity
+        self.load = 0
 
 
     def get_num_slots(self):
@@ -35,6 +126,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return self.capacity
 
 
     def get_load_factor(self):
@@ -44,6 +136,10 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        load_factor = self.load / self.capacity
+        return load_factor
+
+
 
 
     def fnv1(self, key):
@@ -52,8 +148,14 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
-
         # Your code here
+        hval = 0x811c9dc5
+        fnv_32_prime = 0x01000193
+        uint32_max = 2 ** 32
+        for s in key:
+            hval = hval ^ ord(s)
+            hval = (hval * fnv_32_prime) % uint32_max
+        return hval
 
 
     def djb2(self, key):
@@ -70,8 +172,8 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
-        return self.djb2(key) % self.capacity
+        return self.fnv1(key) % self.capacity
+        # return self.djb2(key) % self.capacity
 
     def put(self, key, value):
         """
@@ -82,7 +184,20 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        new_node = HashTableEntry(key, value)
+        index = self.hash_index(key)
+        if self.table[index] == None :
+            self.table[index] = LinkedList()
+            self.table[index].insert_at_head(new_node)
+            self.load += 1
+            if self.get_load_factor() > .7:
+                new_cap1 = self.capacity * 2
+                self.resize(new_cap1)
+        else:
+            self.table[index].insert_or_overwrite_value(new_node)
+        
 
+         
 
     def delete(self, key):
         """
@@ -93,7 +208,14 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        index = self.hash_index(key)
+        if self.table[index] == None:
+            print("Nothing here")
+        elif self.table[index].find(key) == None:
+            print("Nothing here")
+        else:
+            self.table[index].delete(key)
+            self.load -= 1
 
     def get(self, key):
         """
@@ -104,6 +226,13 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        if self.table[index] == None:
+            return None
+        elif self.table[index].find(key) != None:
+            return self.table[index].find(key).value
+        else:
+            return None
 
 
     def resize(self, new_capacity):
@@ -114,6 +243,16 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        old_table = self.table
+        self.capacity = new_capacity
+        self.load = 0
+        self.table = [None] * new_capacity 
+        
+        for i in old_table:
+            if i != None:
+                this_list = i.return_list()
+                for e in this_list:
+                    self.put(e.key, e.value)
 
 
 
